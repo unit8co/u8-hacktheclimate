@@ -1,4 +1,6 @@
 # Import streamlit pandas and geopandas
+import os
+
 import streamlit as st
 import pandas as pd
 import ee
@@ -35,9 +37,6 @@ import json
 @st.cache
 ### This function reads a csv file which contains a list of concentrations by latitude and longitude
 def load_data():
-    # Initialize the library.
-    ee.Initialize()
-    #
     # print(methane_image.getInfo()[:5])
 
     return get_image_collection('COPERNICUS/S5P/OFFL/L3_CH4', 'CH4_column_volume_mixing_ratio_dry_air',
@@ -116,7 +115,17 @@ def local_css(file_name):
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 
+def authenticate_google_service_account() -> None:
+    json_file_name = "gsa.json"
+    with open(json_file_name, mode="w") as f:
+        f.write(os.environ["GSA_JSON"])
+    service_account = 'hacktheclimate-sa@hacktheclimate-308416.iam.gserviceaccount.com'
+    credentials = ee.ServiceAccountCredentials(service_account, json_file_name)
+    ee.Initialize(credentials)
+
+
 def main():
+    authenticate_google_service_account()
     # Load csv data
     image = load_data()
 
