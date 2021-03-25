@@ -1,0 +1,6 @@
+azure-functions
+geopy==1.21.0
+scipy==1.4.1
+requests==2.22.0
+earthengine-api
+geopandas
