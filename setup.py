@@ -7,8 +7,8 @@ def read_requirements(path):
 
 
 setup(
-    name="PythonTemplate",
-    description='Unit8 python library template.',
+    name="Methane Helper",
+    description='Unit8 hackathon challenge',
     version="dev",
     python_requires='>=3.6',
     install_requires=read_requirements('requirements/main.txt'),
