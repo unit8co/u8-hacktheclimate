@@ -1,4 +1,5 @@
 azure
+azure-functions
 pandas
 numpy
 geopandas
