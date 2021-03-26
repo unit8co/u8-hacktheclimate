@@ -73,8 +73,9 @@ def pipelines_as_gdf():
     #  Input 43.5995, 16.3946: 43.6098, 16.5395:
     #  Output: LINESTRING (30 10, 10 30, 40 40)
     df_fossil_pipelines['route'] = 'LINESTRING (' + \
-                                   df_fossil_pipelines['route'].str.replace(',', '').str.replace(':', ',') + \
+                                   df_fossil_pipelines['route'].str.replace(',', ' ').str.replace(';', ' ').str.replace(':', ',') + \
                                    ')'
+
     df_fossil_pipelines['route'] = df_fossil_pipelines['route'].apply(wkt_loads)
 
     return gpd.GeoDataFrame(df_fossil_pipelines, geometry=df_fossil_pipelines['route'])

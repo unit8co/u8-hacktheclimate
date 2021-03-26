@@ -1,49 +1,61 @@
 # Import streamlit pandas and geopandas
 import os
-
 import ee
 # Import folium and related plugins
 import folium
 import streamlit as st
 import streamlit.components.v1 as components
 
+from methane_helper.data import methane_hotspots
 from methane_helper.data.infra_data import *
+from methane_helper.utils import geo_utils
 from methane_helper.utils.ee_utils import (
     get_region_image,
     get_image_collection
 )
-from methane_helper.utils.folium_utils import add_ee_layer
-from methane_helper.utils.folium_utils import add_geo_markers_to_map
+from methane_helper.utils.folium_utils import add_ee_layer, add_circle, add_geo_markers_to_map, add_geo_polygons_to_map
+from methane_helper.utils.geo_utils import str_to_geoson
 
 
 @st.cache
-### This function reads a csv file which contains a list of concentrations by latitude and longitude
-def load_data():
-    # print(methane_image.getInfo()[:5])
-
+def load_methane_data():
     return get_image_collection('COPERNICUS/S5P/OFFL/L3_CH4', 'CH4_column_volume_mixing_ratio_dry_air',
-                                '2020-04-01', '2020-07-16')
+                                '2020-04-01', '2021-04-01')
 
 
-def get_methane_image(img_col):
-    return get_region_image(img_col, 4.8148, 45.7758)
+def add_infra_markers(folium_map, center, max_distance):
+    add_circle(folium_map, center, max_distance)
+
+    # TODO improve labeling
+    add_geo_markers_to_map(folium_map, center, max_distance, load_coal_mines(), 'Coal Mines', 'operator', 'fire', 'gray')
+    add_geo_markers_to_map(folium_map, center, max_distance, load_power_plants(), 'Power Plants', 'name', 'plug', 'blue')
+    add_geo_markers_to_map(folium_map, center, max_distance, load_steel_plants(), 'Steel Plants', 'name', 'industry', 'green')
+
+    add_geo_polygons_to_map(folium_map, center, max_distance, pipelines_as_gdf(), 'route', 'Pipelines', 'name')
 
 
-def add_infra_markers(folium_map):
-    # TODO improve labeling (especially coal and steel)
-    add_geo_markers_to_map(folium_map, load_coal_mines(), 'Coal Mines', 'operator', 'fire', 'gray')
-    ##add_geo_markers_to_map(folium_map, load_fossil_pipelines(), 'Pipelines', 'name')
-    add_geo_markers_to_map(folium_map, load_power_plants(), 'Power Plants', 'name', 'plug', 'blue')
-    add_geo_markers_to_map(folium_map, load_steel_plants(), 'Steel Plants', 'name', 'industry', 'green')
+def extract_hotspot_repr():
+    return str_to_geoson(methane_hotspots.HOTSPOTS)
 
 
-def display_map(image_col):
+def repr_hotspot(index):
+    feature = extract_hotspot_repr()[index]
+    feature['fill_color'] = 'red'
+    map_center = geo_utils.get_feature_center(feature)
+
     folium.Map.add_ee_layer = add_ee_layer
-    m = folium.Map(tiles='OpenStreetMap', zoom_start=1)
-    image_col = image_col.mean()
+    folium_map = folium.Map(map_center, tiles='OpenStreetMap', zoom_start=7)
+    folium.GeoJson(feature, name="hotspot").add_to(folium_map)
 
-    # Add markers for all infrastructure
-    add_infra_markers(m)
+    # Add markers for all NEARBY infrastructure
+    add_infra_markers(folium_map, map_center, 5e5)
+
+    return folium_map
+
+
+def display_map(image_col, hotspot_index):
+    m = repr_hotspot(hotspot_index)
+    image_col = image_col.mean()
 
     # Set visualization parameters.
     vis_params = {
@@ -57,13 +69,10 @@ def display_map(image_col):
 
     # Add a layer control panel to the map.
     m.add_child(folium.LayerControl())
-    print('HERE')
-    m.save("html_example.html")
 
-    with open("html_example.html", mode="r", encoding='utf-8') as f:
-        html_string = f.read()
+    html_string = m.get_root().render()
 
-    return components.html(html_string, height=600)
+    return components.html(html_string, height=600, width=900)
 
 
 ## Adding a background to streamlit page
@@ -81,28 +90,45 @@ def authenticate_google_service_account() -> None:
     ee.Initialize(credentials)
 
 
+PAGES = {
+    "Home": 'home',
+    "Hotspots": 'hotspots',
+    "Overall View": 'overall'
+}
+
+
 def main():
     authenticate_google_service_account()
+
+    # Page Navigation
+    st.sidebar.title("Navigation")
+    selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+
+    page = PAGES[selection]
+    hotspot_index = 0
+
+    with st.spinner(f"Loading {selection} ..."):
+        if page == 'hotspots':
+            hotspots = {'Hotspot {}'.format(i): i for i in range(0, len(extract_hotspot_repr().features))}
+            hotspot = st.sidebar.selectbox(
+                "Select Hotspot", options=list(hotspots.keys())
+            )
+            hotspot_index = hotspots[hotspot]
+
     # Load csv data
-    image = load_data()
+    image = load_methane_data()
 
     # For the page display, create headers and subheader, and get an input address from the user
     local_css("style.css")
-    st.header("Predicting Air Quality in Oakland, California")
+    st.header("Detecting major methane hotspots around the World")
     st.text("")
     st.markdown(
-        '<p class="big-font">This web-app reports annual average concentrations of Black Carbon and Nitrogen Dioxide in Oakland. Concentrations are based on a machine learning model built to make predictions at any location in Oakland using publicly available data on major sources of emissions in Oakland and neighbouring cities, number of traffic intersections, proximity to highways, and local meteorological data.</p>',
+        '<p class="big-font">This web-app detects probable methane leaks in the past 12 days, and handily provides you an easy view of nearby infrastructure, and other visual components like wind direction and infra-red imaging.</p>',
         unsafe_allow_html=True)
     st.text("")
-    st.markdown(
-        '<p class="big-font"> <b> Enter an address below and click on the marker to know the air quality at your place of interest. </b> </p>',
-        unsafe_allow_html=True)
 
-    address = st.text_input("  ", "900 Fallon St, Oakland, CA 94607")
-
-    # Call the display_map function by passing coordinates, dataframe and geoJSON file
-    st.text("")
-    display_map(image)
+    # Call the display_map function by passing the gee image
+    display_map(image, hotspot_index)
 
 
 if __name__ == "__main__":
