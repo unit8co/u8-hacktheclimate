@@ -1,1 +1,9 @@
-# Add here all dependencies required for using a library
+azure
+azure-functions
+pandas
+numpy
+geopandas
+folium
+shapely
+earthengine-api
+geemap

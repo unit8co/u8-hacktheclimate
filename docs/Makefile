@@ -7,7 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
-LIBRARYDIR    = ../python_template
+LIBRARYDIR    = ../methane
 APIDIR        = "${SOURCEDIR}/generated_api"
 
 # Put it first so that "make" without argument is like "make help".
