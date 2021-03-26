@@ -11,7 +11,7 @@ import shapely
 import ee
 
 # Load infra
-from infrastructure import plants_as_gdf, pipelines_as_gdf
+from methane.infrastructure import plants_as_gdf, pipelines_as_gdf
 
 df_plants = plants_as_gdf()
 df_pipelines = pipelines_as_gdf()

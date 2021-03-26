@@ -8,6 +8,7 @@ az container create \
     --name hacktheclimate \
     --image hacktheclimate.azurecr.io/hacktheclimate:1 \
     --dns-name-label methaneapp \
+    --region switzerlandnorth \
     --ports 80 \
     --azure-file-volume-account-name $AZURE_STORAGE_ACCOUNT \
     --azure-file-volume-account-key "$STORAGE_KEY" \

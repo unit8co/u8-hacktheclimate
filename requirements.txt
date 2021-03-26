@@ -1,4 +1,3 @@
-streamlit==0.72.0
 folium==0.10.1
 branca==0.3.1
 geopy==1.21.0

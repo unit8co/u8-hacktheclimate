@@ -4,12 +4,18 @@ Earth Engine loading utils
 
 Function to load and export from earth engine
 """
-
-import matplotlib
-import matplotlib.pyplot as plt
+from pathlib import Path
 
 import ee
 import pandas as pd
+
+
+def authenticate_google_service_account(
+        json_path: Path,
+        service_account: str = 'hacktheclimate-sa@hacktheclimate-308416.iam.gserviceaccount.com',
+) -> None:
+    credentials = ee.ServiceAccountCredentials(service_account, str(json_path))
+    ee.Initialize(credentials)
 
 
 def load_collection(collection):
