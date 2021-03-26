@@ -108,7 +108,7 @@ def methane_hotspots(start_date, end_date):
     )
 
     # Start forming components from filtered areas
-    objects = hotspots_diff.connectedComponents(connectedness=ee.Kernel.plus(1),maxSize=128)
+    objects = hotspots_diff.connectedComponents(connectedness=ee.Kernel.plus(10),maxSize=128)
 
     # Filter on size of objects
     objectSize = (
