@@ -29,12 +29,12 @@ def hotspots_as_gdf(hotspots_gpd, start_date, end_date):
     return (hotspots_gpd
         .assign(min_dist_plant = lambda _df: _df.apply(lambda _e: df_plants.geometry.distance(_e.geometry).min(), axis=1))
         .assign(min_dist_pipeline = lambda _df: _df.apply(lambda _e: df_pipelines.geometry.distance(_e.geometry).min(), axis=1))
-        .assign(min_dist_infra = lambda _df: _df[["min_distance_to_plant", "min_distance_to_pipeline"]].min(axis=1))
+        .assign(min_dist_infra = lambda _df: _df[["min_dist_plant", "min_dist_pipeline"]].min(axis=1))
         .assign(area_m2 = lambda _df: _df.geometry.area)
         # 0 criticality if more than 20km, linear in-between
-        .assign(infra_dist_score = lambda _df: (20 - _df.min_distance_to_infra.clip(0, 20) / 20) )
+        .assign(infra_dist_score = lambda _df: (20 - _df.min_dist_infra.clip(0, 20) / 20) )
         # log of size
-        .assign(criticality = lambda _df: np.log(_df.area_m2+1) / np.log(1.01) / _df.infrastructure_distance_score)
+        .assign(criticality = lambda _df: np.log(_df.area_m2+1) / np.log(1.01) / _df.infra_dist_score)
         .sort_values(by="criticality", ascending=False)
         .assign(start_date=start_date)
         .assign(end_date=end_date)
