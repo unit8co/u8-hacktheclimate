@@ -28,6 +28,10 @@ Some example notebooks can be found in the `notebooks/` directory
 
 The library can be found under `methane/` folder with some autogenrated document
 
+### Azure
+
+Azure function are available in the `azure-daily-hotspots/` directory
+
 ## How we built it
 
 * Use Google Earth Engine to access methane, IR and wind data
