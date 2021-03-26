@@ -17,7 +17,7 @@ df_plants = plants_as_gdf()
 df_pipelines = pipelines_as_gdf()
 df_pipelines = df_pipelines[df_pipelines.geometry.notnull()]
 
-def hotspots_as_gdf(hotspots_gpd):
+def hotspots_as_gdf(hotspots_gpd, start_date, end_date):
     """
     Merge hotspots with infrastructure data and return list of most critical 
     methane events linked to fossil fuel production site
@@ -36,8 +36,8 @@ def hotspots_as_gdf(hotspots_gpd):
         # log of size
         .assign(criticality = lambda _df: np.log(_df.area_m2+1) / np.log(1.01) / _df.infrastructure_distance_score)
         .sort_values(by="criticality", ascending=False)
-        .assign(start_date="20200301")
-        .assign(end_date="20200314")
+        .assign(start_date=start_date)
+        .assign(end_date=end_date)
     )
 
 
@@ -173,9 +173,9 @@ def run(start_date, end_date, fdir='/mounted/'):
     # From GEE
     methane_hotspots_vectors = methane_hotspots(start_date, end_date)
     # Transform to geopandas
-    gpd = fcToGdf(methane_hotspots_vectors)
+    hotspots_gpd = fcToGdf(methane_hotspots_vectors)
     # Link with infra
-    hotspot_w_infra = hotspots_as_gdf(hotspots_gpd)
+    hotspot_w_infra = hotspots_as_gdf(hotspots_gpd, start_date, end_date)
     # write to disk
     gpd.to_file(f'{fdir}/methane_hotspots_start_date={start_date}_end_date={end_date}.geojson', driver='GeoJSON')
     
