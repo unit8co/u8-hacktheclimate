@@ -160,3 +160,23 @@ def save_methane_hotspots(start_date, end_date):
     methane_hotspots_vectors = methane_hotspots(start_date, end_date)
     gpd = fcToGdf(methane_hotspots_vectors)
     gpd.to_file(f'methane_hotspots_start_date={start_date}_end_date={end_date}.geojson', driver='GeoJSON')
+
+    
+def run(start_date, end_date, fdir='/mounted/'):
+    """
+    Return detected methane leaks over period of interest as geopandas dataframe and save file
+
+    :param start_date: Initial date of interest (str: 'YYYY-MM-dd')
+    :param start_date: inal date of interest (str: 'YYYY-MM-dd')
+    :return: 
+    """
+    # From GEE
+    methane_hotspots_vectors = methane_hotspots(start_date, end_date)
+    # Transform to geopandas
+    gpd = fcToGdf(methane_hotspots_vectors)
+    # Link with infra
+    hotspot_w_infra = hotspots_as_gdf(hotspots_gpd)
+    # write to disk
+    gpd.to_file(f'{fdir}/methane_hotspots_start_date={start_date}_end_date={end_date}.geojson', driver='GeoJSON')
+    
+    return "Success"
