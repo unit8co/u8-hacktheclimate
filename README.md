@@ -20,6 +20,14 @@ An easy UI allows then everyone to look at recent methane events and get more in
 
 We hope that gives an easy tool for people to track and then easily raise awareness on such events as they unfold
 
+### Notebooks
+
+Some example notebooks can be found in the `notebooks/` directory
+
+### Library
+
+The library can be found under `methane/` folder with some autogenrated document
+
 ## How we built it
 
 * Use Google Earth Engine to access methane, IR and wind data
