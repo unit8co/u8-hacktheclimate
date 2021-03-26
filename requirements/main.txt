@@ -1,0 +1,8 @@
+
+pandas
+numpy
+geopandas
+folium
+shapely
+earthengine-api
+geemap
