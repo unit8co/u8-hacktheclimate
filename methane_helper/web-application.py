@@ -184,7 +184,7 @@ def main():
             st.header("Detecting major methane hotspots around the World")
             st.text("")
             st.markdown(
-                '<p class="big-font">This web-app detects probable methane leaks in the past 12 days, and handily provides you an easy view of nearby infrastructure, and other visual components like wind direction and infra-red imaging.</p>',
+                '<p class="big-font">This web-app detects probable methane leaks in the past 12 days, and handily provides you an easy view of nearby infrastructure, and other visual components like infra-red imaging.</p>',
                 unsafe_allow_html=True)
             st.text("")
 
