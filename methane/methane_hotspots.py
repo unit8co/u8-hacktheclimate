@@ -177,6 +177,6 @@ def run(start_date, end_date, fdir='/mounted/'):
     # Link with infra
     hotspot_w_infra = hotspots_as_gdf(hotspots_gpd, start_date, end_date)
     # write to disk
-    gpd.to_file(f'{fdir}/methane_hotspots_start_date={start_date}_end_date={end_date}.geojson', driver='GeoJSON')
+    hotspot_w_infra.to_file(f'{fdir}/methane_hotspots_start_date={start_date}_end_date={end_date}.geojson', driver='GeoJSON')
     
     return "Success"
