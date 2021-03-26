@@ -8,9 +8,13 @@ from shapely.ops import transform
 
 
 def get_feature_center(feature):
-    s = shape(feature["geometry"])
+    s = json_to_shape(feature)
     center = s.centroid
     return [center.y, center.x]
+
+
+def json_to_shape(feature):
+    return shape(feature["geometry"])
 
 
 def pandas_to_geopandas(df):

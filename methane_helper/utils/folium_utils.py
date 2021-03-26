@@ -1,12 +1,14 @@
-import folium
 import ee
-import geopy
-from shapely.geometry import shape, Point
+import folium
+from shapely.geometry import Point
 
-from methane_helper.utils.geo_utils import point_distance, str_to_geoson, shape_distance, flip_geojson_coordinates
+import io
+import base64
+
+from methane_helper.utils.geo_utils import point_distance, shape_distance, flip_geojson_coordinates
 
 
-def add_ee_layer(self, ee_image_object, vis_params, name):
+def add_ee_layer(self, ee_image_object, vis_params, name, opacity=0.5, show=True):
     map_id_dict = ee.Image(ee_image_object).getMapId(vis_params)
 
     folium.raster_layers.TileLayer(
@@ -14,7 +16,9 @@ def add_ee_layer(self, ee_image_object, vis_params, name):
         attr="Map Data © Google Earth Engine",
         name=name,
         overlay=True,
-        control=True
+        control=True,
+        opacity=opacity,
+        show=show
     ).add_to(self)
 
 
@@ -37,11 +41,14 @@ def add_geo_markers_to_map(folium_map, center, max_distance, df,
 
 
 def add_geo_polygons_to_map(folium_map, center, max_distance, df, polygon_col,
-                            group_name: str, label_col: str, show: bool = True):
+                            group_name: str, label_col: str, color: str,
+                            show: bool = True):
     feature_group = folium.map.FeatureGroup(name=group_name, show=show)
     folium_map.add_child(feature_group)
     polygons = list(df[df[polygon_col].notnull()][polygon_col])
     labels = list(df[label_col])
+
+    style = {'fillColor': color, 'color': color}
 
     for polygon, label in zip(polygons, labels):
         distance_to_center = shape_distance(Point(center[0], center[1]), polygon)
@@ -49,11 +56,14 @@ def add_geo_polygons_to_map(folium_map, center, max_distance, df, polygon_col,
 
         if (distance_to_center or 1e10) < max_distance/4e5:
             folium.GeoJson(
-                flipped_line
+                flipped_line,
+                style_function=lambda x: style,
+                popup=label,
+                tooltip=label
             ).add_to(feature_group)
 
 
-def add_circle(folium_map, center, radius):
+def add_circle(folium_map, center, radius, label='search-radius'):
     folium.Circle(
         location=center,
         radius=radius,
@@ -64,3 +74,8 @@ def add_circle(folium_map, center, radius):
         fill_color="light-gray",
     ).add_to(folium_map)
 
+
+def fig_to_base64(fig):
+    tmpfile = io.BytesIO()
+    fig.savefig(tmpfile, format='png')
+    return base64.b64encode(tmpfile.getvalue()).decode('utf-8')
