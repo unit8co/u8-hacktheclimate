@@ -7,8 +7,8 @@ def read_requirements(path):
 
 
 setup(
-    name="PythonTemplate",
-    description='Unit8 python library template.',
+    name="MethaneHotspotLibrary",
+    description='Library developed for Hacktheclimate by Unit8 for the Ember & Subak challenge',
     version="dev",
     python_requires='>=3.6',
     install_requires=read_requirements('requirements/main.txt'),
