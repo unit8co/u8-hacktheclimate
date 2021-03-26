@@ -9,4 +9,4 @@ create-env-for-funcs:
 	pip install -r requirements-func.txt
 
 publish-func:
-	func azure functionapp publish loadhostpots
+	func azure functionapp publish loadhotspots
