@@ -5,6 +5,7 @@ sphinx-automodapi
 sphinx_autodoc_typehints
 nbsphinx
 recommonmark==0.7.1
+m2r
 
 # publish
 twine==3.3.0
